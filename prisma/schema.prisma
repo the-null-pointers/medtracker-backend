@@ -1,0 +1,287 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// User system for login and roles
+model User {
+  id         String     @id @default(uuid())
+  email      String?    @unique
+  phone      String?    @unique
+  isVerified Boolean    @default(false)
+  verifyOtp  String?
+  roles      Role[] // ENUM: PATIENT, DOCTOR, ADMIN
+  patients   Patient[] // One-to-many relation with Patient
+  doctor     Doctor?
+  hospitals  Hospital[]
+  created_at DateTime   @default(now())
+}
+
+// Patients information
+model Patient {
+  id               Int             @id @default(autoincrement())
+  first_name       String
+  middle_name      String?
+  last_name        String
+  gender           String? // Consider using an Enum here for better control
+  dob              String?
+  identifier       String?         @unique
+  contact_info     String?
+  address          String?
+  email            String?
+  e_name           String?
+  revisit_interval String?
+  e_contact        String?
+  blood_group      String?
+  about            String?         @db.Text
+  image            String?
+  created_at       DateTime        @default(now())
+  visits           Visit[] // One-to-many relation with Visit
+  healthHistory    HealthHistory[] // One-to-many relation with HealthHistory
+  appointments     Appointment[] // One-to-many relation with Appointment
+  bills            Bill[] // One-to-many relation with Bill
+  prescriptions    Prescription[] // One-to-many relation with Prescription
+  insurance        Insurance? // One-to-one relation with Insurance
+  user             User            @relation(fields: [user_id], references: [id])
+  user_id          String
+  Review           Review[]
+
+  @@unique([first_name, last_name, middle_name, gender])
+}
+
+// Doctors information
+model Doctor {
+  id              Int             @id @default(autoincrement())
+  first_name      String
+  last_name       String
+  specialization  String
+  contact_info    String
+  created_at      DateTime        @default(now())
+  visits          Visit[] // One-to-many relation with Visit
+  treatments      Treatment[] // One-to-many relation with Treatment
+  healthHistories HealthHistory[] // One-to-many relation with HealthHistory
+  appointments    Appointment[] // One-to-many relation with Appointment
+  prescriptions   Prescription[] // One-to-many relation with Prescription
+  hospitals       Hospital[] // One-to-many relation with Hospital
+  user            User            @relation(fields: [user_id], references: [id])
+  user_id         String          @unique
+
+  Review Review[]
+}
+
+// Hospital model now acts as Vendor, with its own admin
+model Hospital {
+  id             Int       @id @default(autoincrement())
+  hospital_name  String
+  location       String
+  contact_info   String
+  infoMail       String?
+  about          String?
+  image          String?
+  province       String?
+  district       String?
+  ward           String?
+  street         String?
+  established    DateTime?
+  isVerified     Boolean?
+  adminPhone     String?
+  licenseNumber  String?
+  licenseExpiry  DateTime?
+  latitude       Float?
+  longitude      Float?
+  emergencyPhone String?
+  rating         Float?
+
+  created_at DateTime @default(now())
+
+  // Relations
+  services       Service[] // Relation to services offered
+  departments    Department[] // Relation to departments available
+  accreditations Accreditation[] // Relation to accreditations
+
+  doctors Doctor[]
+  admins  User[]
+  visits  Visit[]
+  reviews Review[]
+}
+
+model Service {
+  id         Int      @id @default(autoincrement())
+  name       String // Name of the service
+  hospitalId Int // Relation to hospital
+  hospital   Hospital @relation(fields: [hospitalId], references: [id])
+}
+
+model Department {
+  id         Int      @id @default(autoincrement())
+  name       String // Name of the department
+  hospitalId Int // Relation to hospital
+  hospital   Hospital @relation(fields: [hospitalId], references: [id])
+}
+
+model Accreditation {
+  id         Int      @id @default(autoincrement())
+  name       String // Accreditation or certification name
+  hospitalId Int // Relation to hospital
+  hospital   Hospital @relation(fields: [hospitalId], references: [id])
+}
+
+model Review {
+  id          Int      @id @default(autoincrement())
+  rating      Int
+  comment     String
+  patient     Patient  @relation(fields: [patient_id], references: [id])
+  patient_id  Int
+  doctor      Doctor   @relation(fields: [doctor_id], references: [id])
+  doctor_id   Int
+  hospital    Hospital @relation(fields: [hospital_id], references: [id])
+  hospital_id Int
+  created_at  DateTime @default(now())
+}
+
+// Visits information
+model Visit {
+  id            Int            @id @default(autoincrement())
+  visit_date    DateTime
+  reason        String
+  tokenNo       String
+  patient       Patient        @relation(fields: [patient_id], references: [id])
+  patient_id    Int
+  doctor        Doctor         @relation(fields: [doctor_id], references: [id])
+  doctor_id     Int
+  status        visitStatus?   @default(PENDING)
+  created_at    DateTime       @default(now())
+  treatments    Treatment[] // One-to-many relation with Treatment
+  prescriptions Prescription[] // One-to-many relation with Prescription
+  bills         Bill[] // One-to-many relation with Bill
+  hospital      Hospital       @relation(fields: [hospital_id], references: [id])
+  hospital_id   Int
+  updated_at    DateTime       @default(now())
+
+  labReports LabReport[]
+}
+
+model LabReport {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  reportDate  DateTime @default(now())
+  fileUrl     String? // URL to the report file
+  visit_id    Int // Relation to Visit
+  visit       Visit    @relation(fields: [visit_id], references: [id])
+  created_at  DateTime @default(now())
+}
+
+// Treatments provided during a visit
+model Treatment {
+  id             Int      @id @default(autoincrement())
+  treatment_name String
+  prescription   String?
+  diagnosis      String?
+  treatment_date DateTime
+  visit          Visit    @relation(fields: [visit_id], references: [id])
+  visit_id       Int
+  doctor         Doctor   @relation(fields: [doctor_id], references: [id])
+  doctor_id      Int
+}
+
+// Health History of patients (chronic conditions, allergies, etc.)
+model HealthHistory {
+  id           Int      @id @default(autoincrement())
+  condition    String
+  description  String
+  diagnosed_on DateTime
+  patient      Patient  @relation(fields: [patient_id], references: [id])
+  patient_id   Int
+  doctor       Doctor   @relation(fields: [doctor_id], references: [id])
+  doctor_id    Int
+  created_at   DateTime @default(now())
+}
+
+// Appointments for patients to see doctors
+model Appointment {
+  id               Int       @id @default(autoincrement())
+  appointment_date DateTime
+  status           String // Status: scheduled, completed, canceled
+  patient          Patient   @relation(fields: [patient_id], references: [id])
+  patient_id       Int
+  doctor           Doctor    @relation(fields: [doctor_id], references: [id])
+  doctor_id        Int
+  created_at       DateTime  @default(now())
+  cancelled_at     DateTime?
+}
+
+// Prescriptions issued by doctors
+model Prescription {
+  id              Int       @id @default(autoincrement())
+  medication_name String
+  dosage          String
+  frequency       String
+  start_date      DateTime
+  end_date        DateTime?
+  visit           Visit     @relation(fields: [visit_id], references: [id])
+  visit_id        Int
+  patient         Patient   @relation(fields: [patient_id], references: [id])
+  patient_id      Int
+  doctor          Doctor    @relation(fields: [doctor_id], references: [id])
+  doctor_id       Int
+  created_at      DateTime  @default(now())
+}
+
+// Billing information for visits and treatments
+model Bill {
+  id             Int      @id @default(autoincrement())
+  total_amount   Float
+  payment_status String // Status: Paid, Unpaid, Pending
+  visit          Visit    @relation(fields: [visit_id], references: [id])
+  visit_id       Int
+  created_at     DateTime @default(now())
+
+  Patient Patient[]
+}
+
+// Insurance details for patients
+model Insurance {
+  id              Int      @id @default(autoincrement())
+  provider_name   String
+  policy_number   String
+  coverage_amount Float
+  patient         Patient  @relation(fields: [patient_id], references: [id])
+  patient_id      Int      @unique
+  created_at      DateTime @default(now())
+}
+
+model Role {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  users User[]
+
+  // PATIENT
+
+  // DOCTOR
+  // HOSPITAL_RECEPTIONIST // New role for lab admins
+  // LAB_ASSISTANT // New role for hospital admins
+  // PHARMACY // New role for pharmacy admins
+  // MUNICIPALITY // New role for municipality admins
+  // METROPOLITAN // New role for metropolitan admins
+  // DISTRICT // New role for district admins
+  // PROVINCE // New role for province admins
+  // GOVERNMENT // New role for government admins
+  // ADMIN // New role for super admins
+}
+
+enum visitStatus {
+  PENDING
+  COMPLETED
+  CANCELED
+}
