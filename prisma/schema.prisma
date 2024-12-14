@@ -25,6 +25,8 @@ model User {
   doctor     Doctor?
   hospitals  Hospital[]
   created_at DateTime   @default(now())
+
+  Notification Notification[]
 }
 
 // Patients information
@@ -55,6 +57,7 @@ model Patient {
   user             User            @relation(fields: [user_id], references: [id])
   user_id          String
   Review           Review[]
+  Notification     Notification[]
 
   @@unique([first_name, last_name, middle_name, gender])
 }
@@ -149,6 +152,19 @@ model Review {
   created_at  DateTime @default(now())
 }
 
+model Notification {
+  id         Int      @id @default(autoincrement())
+  type       String?  @default("REMINDER")
+  condition  String?  @default("NORMAL")
+  title      String?
+  message    String?
+  seen       Boolean  @default(false)
+  patients    Patient []
+  user       User     @relation(fields: [user_id], references: [id])
+  user_id    String
+  created_at DateTime @default(now())
+}
+
 // Visits information
 model Visit {
   id            Int            @id @default(autoincrement())
@@ -157,9 +173,9 @@ model Visit {
   tokenNo       String
   patient       Patient        @relation(fields: [patient_id], references: [id])
   patient_id    Int
-  doctor        Doctor         @relation(fields: [doctor_id], references: [id])
-  doctor_id     Int
-  status        visitStatus?   @default(PENDING)
+  doctor        Doctor?         @relation(fields: [doctor_id], references: [id])
+  doctor_id     Int?
+  status        visitStatus?   @default(QUEUE)
   created_at    DateTime       @default(now())
   treatments    Treatment[] // One-to-many relation with Treatment
   prescriptions Prescription[] // One-to-many relation with Prescription
@@ -186,8 +202,8 @@ model LabReport {
 model Treatment {
   id             Int      @id @default(autoincrement())
   treatment_name String
-  prescription   String?
   diagnosis      String?
+  symptoms       String?
   treatment_date DateTime
   visit          Visit    @relation(fields: [visit_id], references: [id])
   visit_id       Int
@@ -282,6 +298,8 @@ model Role {
 
 enum visitStatus {
   PENDING
-  COMPLETED
+  QUEUE
+  ON_GOING
+  SUCCESS
   CANCELED
 }
