@@ -139,6 +139,7 @@ export class HospitalService {
     const data = await this.prisma.visit.findMany({
       where: {
         hospital_id: hospital_id,
+        status: 'QUEUE',
         // visit_date: {
         //   gte: startDate,
         //   lte: endDate,
@@ -153,6 +154,37 @@ export class HospitalService {
       return responseHelper.success('Patients not found', data);
     }
     return responseHelper.success('Data fetched successfully', data);
+  }
+  async onGoingPatients(hospital_id: number) {
+    const visit_date = new Date();
+    const startDate = new Date(visit_date);
+    const endDate = new Date(visit_date);
+    endDate.setDate(endDate.getDate() + 1);
+    const data = await this.prisma.visit.findMany({
+      where: {
+        hospital_id: hospital_id,
+        status: 'ON_GOING',
+        
+      },
+      include: {
+        doctor: true,
+        patient: true,
+      },
+    });
+    if (!data) {
+      return responseHelper.success('Patients not found', data);
+    }
+    return responseHelper.success('Data fetched successfully', data);
+  }
+  async updateStatus(visit_id: number, status: any) {
+    const visit = await this.prisma.visit.update({
+      where: {
+        id: visit_id,
+      },
+      data: {
+        status: status,
+      },
+    });
   }
 
   async createPatient(createPatientDto: CreatePatientFromHospitalDto) {
