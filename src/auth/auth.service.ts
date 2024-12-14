@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import {
   EmailRegisterDto,
   RegisterDto,
+  UpdateUserDto,
   VerfiyEmailRegisterDto,
   VerfiyRegisterDto,
 } from './dto/create-auth.dto';
@@ -157,6 +158,11 @@ export class AuthService {
       },
       data: {
         verifyOtp: verifyOtp.toString(),
+        roles: {
+          connect: {
+            name: 'PATIENT',
+          },
+        },
       },
     });
     // send this otp to phone or email to the user for verification
@@ -204,15 +210,18 @@ export class AuthService {
           phone: true,
           patients: {
             select: {
-              _count: true,
+              // _count: true,
               id: true,
+              first_name: true,
+              last_name: true,
             },
           },
           doctor: true,
           hospitals: {
             select: {
-              _count: true,
+              // _count: true,
               id: true,
+              hospital_name: true,
             },
           },
         },
@@ -227,6 +236,9 @@ export class AuthService {
         hasPatients: user.patients?.length > 0 ? true : false,
         hasHospitals: user.hospitals?.length > 0 ? true : false,
         hasDoctor: user.doctor ? true : false,
+        patients: user.patients,
+        hospitals: user.hospitals,
+        doctor: user.doctor,
       });
     } else {
       throw new BadRequestException(
@@ -284,6 +296,11 @@ export class AuthService {
       },
       data: {
         verifyOtp: verifyOtp.toString(),
+        roles: {
+          connect: {
+            name: 'PATIENT',
+          },
+        },
       },
     });
     const emailText = `Your OTP is ${verifyOtp}`;
@@ -337,15 +354,18 @@ export class AuthService {
           phone: true,
           patients: {
             select: {
-              _count: true,
+              // _count: true,
               id: true,
+              first_name: true,
+              last_name: true,
             },
           },
           doctor: true,
           hospitals: {
             select: {
-              _count: true,
+              // _count: true,
               id: true,
+              hospital_name: true,
             },
           },
         },
@@ -360,6 +380,9 @@ export class AuthService {
         hasPatients: user.patients?.length > 0 ? true : false,
         hasHospitals: user.hospitals?.length > 0 ? true : false,
         hasDoctor: user.doctor ? true : false,
+        patients: user.patients,
+        hospitals: user.hospitals,
+        doctor: user.doctor,
       });
     } else {
       throw new BadRequestException(
@@ -368,5 +391,55 @@ export class AuthService {
         }),
       );
     }
+  }
+
+  async updateUser(id: string, updateUserDto: UpdateUserDto) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id,
+      },
+    });
+    const userPhone = await this.prisma.user.findUnique({
+      where: {
+        phone: updateUserDto.phone,
+      },
+    });
+    //  if the phone of the user is already exist then throw an error
+    if (userPhone && userPhone.id !== id) {
+      throw new BadRequestException(
+        responseHelper.error('Phone number already exist', {
+          phone: ['Phone number already exist'],
+        }),
+      );
+    }
+    const userEmail = await this.prisma.user.findUnique({
+      where: {
+        email: updateUserDto.email,
+      },
+    });
+    if (userEmail && userEmail.id !== id) {
+      throw new BadRequestException(
+        responseHelper.error('Email already exist', {
+          email: ['Email already exist'],
+        }),
+      );
+    }
+    if (!user) {
+      throw new BadRequestException(
+        responseHelper.error('User does not exist', {
+          id: ['User does not exist'],
+        }),
+      );
+    }
+    const updatedUser = await this.prisma.user.update({
+      where: {
+        id: id,
+      },
+      data: {
+        ...updateUserDto,
+      },
+    });
+
+    return responseHelper.success('User updated successfully', updatedUser);
   }
 }
