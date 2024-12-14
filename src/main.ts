@@ -53,8 +53,8 @@ async function bootstrap() {
     }),
   );
   const config = new DocumentBuilder()
-    .setTitle('Your Project API')
-    .setDescription('API documentation for Your Project')
+    .setTitle('Med Tracker')
+    .setDescription('API for med tracker codefest 2024 (The Null Pointers)')
     .setVersion('1.0')
     .addBearerAuth({
       type: 'http',
