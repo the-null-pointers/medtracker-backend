@@ -1,8 +1,16 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 
-import { EmailRegisterDto, RegisterDto, VerfiyEmailRegisterDto, VerfiyRegisterDto } from './dto/create-auth.dto';
-import { ApiResponse } from '@nestjs/swagger';
+import {
+  EmailRegisterDto,
+  RegisterDto,
+  UpdateUserDto,
+  VerfiyEmailRegisterDto,
+  VerfiyRegisterDto,
+} from './dto/create-auth.dto';
+import { ApiBearerAuth, ApiProperty, ApiResponse } from '@nestjs/swagger';
+import { CurrentUser } from 'src/current-user/current-user.decorator';
+import { AuthGuard } from './auth.guard';
 
 @Controller('api/auth')
 export class AuthController {
@@ -31,5 +39,15 @@ export class AuthController {
   @Post('email-verify')
   emailAuthVerify(@Body() verifyRegisterDto: VerfiyEmailRegisterDto) {
     return this.authService.emailAuthVerify(verifyRegisterDto);
+  }
+  @ApiProperty()
+  @UseGuards(AuthGuard)
+  @Post('update-user')
+    @ApiBearerAuth()
+  updateUser(
+    @Body() updateUserDto: UpdateUserDto,
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.authService.updateUser(user.id, updateUserDto);
   }
 }
