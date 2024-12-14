@@ -34,7 +34,6 @@ export class ProfileService {
               blood_group: createProfileDto.bloodGroup,
               e_name: createProfileDto.eName,
               about: createProfileDto.about,
-              
             },
           },
         },
@@ -45,7 +44,7 @@ export class ProfileService {
       return responseHelper.success('Patient added successfully', profile);
     } catch (error) {
       throw new BadRequestException(
-        responseHelper.error(error.message, await error),
+        responseHelper.error('Some fields are missing or invalid', await error),
       );
     }
   }
@@ -91,7 +90,7 @@ export class ProfileService {
       return responseHelper.success('Patient updated successfully', profile);
     } catch (error) {
       throw new BadRequestException(
-        responseHelper.error(error.message, await error),
+        responseHelper.error('Some fields are missing or invalid', await error),
       );
     }
   }
@@ -114,8 +113,7 @@ export class ProfileService {
               first_name: true,
               last_name: true,
               middle_name: true,
-              
-            }
+            },
           },
         },
       });
@@ -127,9 +125,11 @@ export class ProfileService {
     }
   }
   async findOnePatient(id: number, user: any) {
+    console.log(id, user);
     const patient = await this.prisma.patient.findUnique({
       where: {
         id: id,
+        user_id: user.id,
       },
       include: {
         user: {
@@ -141,11 +141,21 @@ export class ProfileService {
           },
         },
         healthHistory: true,
+
         bills: true,
         prescriptions: true,
         insurance: true,
         appointments: true,
-        visits: true,
+        visits: {
+          include: {
+            hospital: {
+              select: {
+                id: true,
+                hospital_name: true,
+              },
+            },
+          },
+        },
       },
     });
     if (!patient) {
