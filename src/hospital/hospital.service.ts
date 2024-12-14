@@ -139,10 +139,10 @@ export class HospitalService {
     const data = await this.prisma.visit.findMany({
       where: {
         hospital_id: hospital_id,
-        visit_date: {
-          gte: startDate,
-          lte: endDate,
-        },
+        // visit_date: {
+        //   gte: startDate,
+        //   lte: endDate,
+        // },
       },
       include: {
         doctor: true,
@@ -152,7 +152,7 @@ export class HospitalService {
     if (!data) {
       return responseHelper.success('Patients not found', data);
     }
-    return responseHelper.success('Patients found successfully', data);
+    return responseHelper.success('Data fetched successfully', data);
   }
 
   async createPatient(createPatientDto: CreatePatientFromHospitalDto) {
@@ -165,7 +165,7 @@ export class HospitalService {
       .replace('T', '')
       .replace(':', '-')
       .replace(':', '')
-      .slice(0, 14);
+      .slice(0, 15);
     const user = await this.prisma.user.findUnique({
       where: {
         phone: createPatientDto.phone,

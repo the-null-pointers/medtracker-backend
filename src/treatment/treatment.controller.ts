@@ -15,24 +15,29 @@ import { Roles } from 'src/roles/roles.decorator';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { CurrentUser } from 'src/current-user/current-user.decorator';
+import { RolesGuard } from 'src/roles/roles.guard';
 
-UseGuards(AuthGuard)
+@UseGuards(AuthGuard, RolesGuard)
 @Controller('api/treatment')
 export class TreatmentController {
   constructor(private readonly treatmentService: TreatmentService) {}
   @Roles('DOCTOR')
   @ApiBearerAuth()
   @Post('')
-  create(@Body() createTreatmentDto: CreateTreatmentDto,@CurrentUser() user: any) {
-    return this.treatmentService.addTreatment(createTreatmentDto,user);
+  create(
+    @Body() createTreatmentDto: CreateTreatmentDto,
+    @CurrentUser() user: any,
+  ) {
+    console.log(user);
+    return this.treatmentService.addTreatment(createTreatmentDto, user);
   }
-  @Roles('ADMIN',"DOCTOR")
+  @Roles('ADMIN', 'DOCTOR')
   @ApiBearerAuth()
   @Get()
   findAll() {
     return this.treatmentService.findAll();
   }
-  @Roles('DOCTOR',"ADMIN")
+  @Roles('DOCTOR', 'ADMIN')
   @ApiBearerAuth()
   @Get(':id')
   findOne(@Param('id') id: string) {

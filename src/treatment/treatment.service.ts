@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateTreatmentDto } from './dto/create-treatment.dto';
 import { UpdateTreatmentDto } from './dto/update-treatment.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -8,6 +12,11 @@ import responseHelper from 'src/helper/response-helper';
 export class TreatmentService {
   constructor(private readonly prisma: PrismaService) {}
   async addTreatment(createTreatmentDto: CreateTreatmentDto, user: any) {
+    if (!user?.doctor?.id) {
+      throw new ForbiddenException(
+        responseHelper.error('You are not a doctor'),
+      );
+    }
     const visit = await this.prisma.visit.findUnique({
       where: {
         id: createTreatmentDto.visit_id,
@@ -15,6 +24,16 @@ export class TreatmentService {
     });
     if (!visit) {
       throw new NotFoundException(responseHelper.error('Visit not found'));
+    }
+    if (!visit.doctor_id) {
+      await this.prisma.visit.update({
+        where: {
+          id: visit.id,
+        },
+        data: {
+          doctor_id: user?.doctor.id,
+        },
+      });
     }
     const treatment = await this.prisma.treatment.create({
       data: {
@@ -35,7 +54,7 @@ export class TreatmentService {
         patient_id: visit.patient_id,
         start_date: prescription.start_date,
         end_date: prescription.end_date,
-        doctor_id: user?.doctor?.id,
+        doctor_id: user?.doctor?.id || undefined,
       })),
     });
     return responseHelper.success('Treatment added successfully', {
