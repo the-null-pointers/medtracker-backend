@@ -24,3 +24,11 @@ export class VerfiyEmailRegisterDto {
   @ApiProperty({ example: '123456' })
   otp: string;
 }
+
+export class UpdateUserDto{
+  @ApiProperty({ example: '98xxxx' })
+  phone: string;
+  @ApiProperty({ example: 'john@gmail.com' })
+  email: string;
+  
+}
