@@ -18,7 +18,7 @@ import { CurrentUser } from 'src/current-user/current-user.decorator';
 import { Roles } from 'src/roles/roles.decorator';
 import { RolesGuard } from 'src/roles/roles.guard';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiProperty } from '@nestjs/swagger';
 
 @UseGuards(AuthGuard, RolesGuard)
 @Controller('api/hospital')
@@ -47,6 +47,17 @@ export class HospitalController {
   @Roles('ADMIN')
   verifyHospital(@Param('id') id: number) {
     return this.hospitalService.verifyHospital(id);
+  }
+
+  @ApiBearerAuth()
+  @ApiProperty()
+  @Patch('/:visit_id/:status')
+  @Roles('DOCTOR', 'ADMIN', 'HOSPITAL')
+  updateStatus(
+    @Param('visit_id') visit_id: string,
+    @Param('status') status: string,
+  ) {
+    return this.hospitalService.updateStatus(+visit_id, status);
   }
 
   @ApiBearerAuth()
@@ -88,6 +99,12 @@ export class HospitalController {
   @Roles('HOSPITAL')
   findOneDayPatients(@Param('hospital_id') hospital_id: number) {
     return this.hospitalService.queuePatients(+hospital_id);
+  }
+  @ApiBearerAuth()
+  @Get('on-going-patients/:hospital_id')
+  @Roles('HOSPITAL')
+  findOnGoingPatients(@Param('hospital_id') hospital_id: number) {
+    return this.hospitalService.onGoingPatients(+hospital_id);
   }
 
   @ApiBearerAuth()
