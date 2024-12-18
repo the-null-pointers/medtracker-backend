@@ -45,12 +45,9 @@ export class TreatmentController {
   }
   @Roles('DOCTOR')
   @ApiBearerAuth()
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateTreatmentDto: UpdateTreatmentDto,
-  ) {
-    return this.treatmentService.update(+id, updateTreatmentDto);
+  @Patch('')
+  update(@Body() updateTreatmentDto: UpdateTreatmentDto) {
+    return this.treatmentService.update(updateTreatmentDto);
   }
 
   // @Delete(':id')

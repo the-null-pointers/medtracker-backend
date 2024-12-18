@@ -9,7 +9,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgres"
   url      = env("DATABASE_URL")
 }
 
@@ -153,16 +153,16 @@ model Review {
 }
 
 model Notification {
-  id         Int      @id @default(autoincrement())
-  type       String?  @default("REMINDER")
-  condition  String?  @default("NORMAL")
+  id         Int       @id @default(autoincrement())
+  type       String?   @default("REMINDER")
+  condition  String?   @default("NORMAL")
   title      String?
   message    String?
-  seen       Boolean  @default(false)
-  patients    Patient []
-  user       User     @relation(fields: [user_id], references: [id])
+  seen       Boolean   @default(false)
+  patients   Patient[]
+  user       User      @relation(fields: [user_id], references: [id])
   user_id    String
-  created_at DateTime @default(now())
+  created_at DateTime  @default(now())
 }
 
 // Visits information
@@ -173,7 +173,7 @@ model Visit {
   tokenNo       String
   patient       Patient        @relation(fields: [patient_id], references: [id])
   patient_id    Int
-  doctor        Doctor?         @relation(fields: [doctor_id], references: [id])
+  doctor        Doctor?        @relation(fields: [doctor_id], references: [id])
   doctor_id     Int?
   status        visitStatus?   @default(QUEUE)
   created_at    DateTime       @default(now())

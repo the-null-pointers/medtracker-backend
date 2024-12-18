@@ -16,9 +16,10 @@ import { MailerModule } from './mailer/mailer.module';
 import { TwilioService } from './twilio/twilio.service';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { NotificationModule } from './notification/notification.module';
+import { GenerateAdminsModule } from './generate-admins/generate-admins.module';
 
 @Module({
-  imports: [AuthModule, PrismaModule, ProfileModule, HospitalModule, DoctorModule, TreatmentModule, HealthHistoryModule, RolesModule, LabReportModule, MailerModule, DashboardModule, NotificationModule],
+  imports: [AuthModule, PrismaModule, ProfileModule, HospitalModule, DoctorModule, TreatmentModule, HealthHistoryModule, RolesModule, LabReportModule, MailerModule, DashboardModule, NotificationModule, GenerateAdminsModule],
   controllers: [AppController],
   providers: [AppService, PrismaService, TwilioService],
 })

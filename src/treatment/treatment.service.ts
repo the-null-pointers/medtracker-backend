@@ -85,19 +85,19 @@ export class TreatmentService {
     return responseHelper.success('Treatment found successfully', treatment);
   }
 
-  async update(id: number, updateTreatmentDto: UpdateTreatmentDto) {
-    let treatment = await this.prisma.treatment.findUnique({
+  async update( updateTreatmentDto: UpdateTreatmentDto) {
+    let treatment = await this.prisma.treatment.findFirst({
       where: {
-        id: id,
+        visit_id: updateTreatmentDto.visit_id,
       },
     });
     if (!treatment) {
       throw new NotFoundException(responseHelper.error('Treatment not found'));
     }
 
-    treatment = await this.prisma.treatment.update({
+    let newTreatment = await this.prisma.treatment.update({
       where: {
-        id: id,
+        id: treatment.id,
       },
       data: {
         treatment_name: updateTreatmentDto.treatment_name,

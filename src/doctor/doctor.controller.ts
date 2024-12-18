@@ -31,7 +31,7 @@ export class DoctorController {
 
   @Get("all")
   @ApiBearerAuth()
-  @Roles('ADMIN')
+
   findAll() {
     return this.doctorService.allDoctors();
   }
