@@ -21,66 +21,55 @@ export class GenerateAdminsService {
         roles: {
           connect: createGenerateAdminDto.roles,
         },
+        patients: {
+          createMany: {
+            data: [
+              {
+                first_name: 'John',
+                last_name: 'Doe',
+                middle_name: 'A',
+              },
+              {
+                first_name: 'Jane',
+                last_name: 'Doe',
+                middle_name: 'B',
+              },
+            ],
+          },
+        },
+        hospitals: {
+          create: {
+            hospital_name: 'Hospital A',
+            adminPhone: '0000000000',
+            about: 'About Hospital A',
+            location: 'Location A',
+            contact_info: 'Contact Info A',
+            isVerified: true,
+          },
+        },
+        doctor: {
+          create: {
+            specialization: 'Specialization A',
+            contact_info: 'Contact Info A',
+            first_name: 'John',
+            last_name: 'Doe',
+            hospitals: {
+              connect: {
+                id: 1,
+              },
+            },
+          },
+        },
+      },
+      include: {
+        hospitals: true,
+        doctor: true,
+        patients: true,
       },
     });
-    //   add patients to admin
-    const patients = await this.prisma.patient.createMany({
-      data: [
-        {
-          first_name: 'John',
-          last_name: 'Doe',
-          middle_name: 'A',
-          user_id: admin.id,
-        },
-        {
-          first_name: 'Jane',
-          last_name: 'Doe',
-          middle_name: 'B',
-          user_id: admin.id,
-        },
-        {
-          first_name: 'Bob',
-          last_name: 'Smith',
-          middle_name: 'C',
-          user_id: admin.id,
-        },
-        {
-          first_name: 'Alice',
-          last_name: 'Johnson',
-          middle_name: 'D',
-          user_id: admin.id,
-        },
-        {
-          first_name: 'Charlie',
-          last_name: 'Williams',
-          middle_name: 'E',
-          user_id: admin.id,
-        },
-      ],
-    });
-    // add hospitals to admin
-    const hospitals = await this.prisma.hospital.createMany({
-      data: [
-        {
-          hospital_name: 'Hospital A',
-          adminPhone: '0000000000',
-          about: 'About Hospital A',
-          location: 'Location A',
-          contact_info: 'Contact Info A',
-          isVerified: true,
-        },
-      ],
-    });
-
-    if (!generateAdmins || !admin || !patients || !hospitals) {
-      throw new Error('Error creating generateAdmins');
-    }
 
     return responseHelper.success('Admin created successfully', {
-      generateAdmins,
       admin,
-      patients,
-      hospitals,
     });
   }
 
