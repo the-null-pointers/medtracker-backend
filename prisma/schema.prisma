@@ -9,7 +9,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgres"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -27,6 +27,7 @@ model User {
   created_at DateTime   @default(now())
 
   Notification Notification[]
+  Feedback     Feedback[]
 }
 
 // Patients information
@@ -112,10 +113,11 @@ model Hospital {
   departments    Department[] // Relation to departments available
   accreditations Accreditation[] // Relation to accreditations
 
-  doctors Doctor[]
-  admins  User[]
-  visits  Visit[]
-  reviews Review[]
+  doctors  Doctor[]
+  admins   User[]
+  visits   Visit[]
+  reviews  Review[]
+  Feedback Feedback[]
 }
 
 model Service {
@@ -150,6 +152,17 @@ model Review {
   hospital    Hospital @relation(fields: [hospital_id], references: [id])
   hospital_id Int
   created_at  DateTime @default(now())
+}
+
+model Feedback {
+  id         Int      @id @default(autoincrement())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  title      String
+  message    String
+  hospitalId Int
+  hospital   Hospital @relation(fields: [hospitalId], references: [id])
+  created_at DateTime @default(now())
 }
 
 model Notification {
@@ -303,3 +316,5 @@ enum visitStatus {
   SUCCESS
   CANCELED
 }
+ 
+ 
