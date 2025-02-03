@@ -191,49 +191,44 @@ export class DoctorService {
   async patientsOfOneDoctor(id: number, hospital_id: number) {
     const visit_date = new Date();
     const startDate = new Date(visit_date);
-    const endDate = new Date(visit_date);
-    endDate.setDate(endDate.getDate() + 1);
-    const data = await this.prisma.doctor.findUnique({
+    startDate.setDate(startDate.getDate() - 1); // Set start date to 24 hours ago
+    const data = await this.prisma.visit.findMany({
       where: {
-        hospitals: {
-          some: {
-            id: hospital_id,
-          },
-        },
-        id: id,
-        visits: {
-          some: {
-            visit_date: {
-              gte: startDate,
-              lte: endDate,
-            },
-            status: 'PENDING',
-          },
+        hospital_id: hospital_id,
+        doctor_id: id,
+        status: 'QUEUE',
+        visit_date: {
+          gte: startDate,
+          lte: visit_date,
         },
       },
-      include: {
-        visits: {
+
+      select: {
+        id: true,
+        reason: true,
+        status: true,
+        tokenNo: true,
+        patient: {
           select: {
-            reason: true,
-            tokenNo: true,
-            patient: {
-              select: {
-                id: true,
-                first_name: true,
-                last_name: true,
-                revisit_interval: true,
-                blood_group: true,
-                gender: true,
-              },
-            },
+            id: true,
+            first_name: true,
+            last_name: true,
+            revisit_interval: true,
+            blood_group: true,
+            gender: true,
           },
         },
       },
     });
+
+    console.log(data);
     if (!data) {
       return responseHelper.success('No Patients found', []);
     }
-    return responseHelper.success('Patients found successfully', data);
+    return responseHelper.success(
+      'Visit detail with Patients details found successfully',
+      { visits: data },
+    );
   }
   async detailsOfOnePatientByDoctor(
     id: number,
@@ -241,49 +236,34 @@ export class DoctorService {
     hospital_id: number,
   ) {
     const visit_date = new Date();
+
     const startDate = new Date(visit_date);
-    const endDate = new Date(visit_date);
-    endDate.setDate(endDate.getDate() + 1);
-    const data = await this.prisma.doctor.findUnique({
+    startDate.setDate(startDate.getDate() - 1);
+
+    const data = await this.prisma.visit.findUnique({
       where: {
-        hospitals: {
-          some: {
-            id: hospital_id,
-          },
-        },
-        id,
-        visits: {
-          some: {
-            visit_date: {
-              gte: startDate,
-              lte: endDate,
-            },
-          },
+        hospital_id: hospital_id,
+        doctor_id: id,
+        id: visit_id,
+        visit_date: {
+          gte: startDate,
+          lte: visit_date,
         },
       },
       include: {
-        visits: {
-          where: {
-            id: visit_id,
-          },
+        patient: {
           select: {
-            reason: true,
-            tokenNo: true,
-            patient: {
-              select: {
-                id: true,
-                first_name: true,
-                last_name: true,
-                revisit_interval: true,
-                blood_group: true,
-                gender: true,
-                visits: {
-                  include: {
-                    treatments: true,
-                    doctor: true,
-                    labReports: true,
-                  },
-                },
+            id: true,
+            first_name: true,
+            last_name: true,
+            revisit_interval: true,
+            blood_group: true,
+            gender: true,
+            visits: {
+              include: {
+                treatments: true,
+                doctor: true,
+                labReports: true,
               },
             },
           },
@@ -291,9 +271,9 @@ export class DoctorService {
       },
     });
     if (!data) {
-      throw new NotFoundException(responseHelper.error('Doctors not found'));
+      throw new NotFoundException(responseHelper.error('Visit not found'));
     }
-    return responseHelper.success('Doctors found successfully', data);
+    return responseHelper.success('Visit found successfully', data);
   }
 
   async associateHospitalsOfDoctor(id: number) {

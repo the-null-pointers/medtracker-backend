@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { DoctorService } from './doctor.service';
 import { CreateDoctorDto } from './dto/create-doctor.dto';
@@ -29,13 +30,12 @@ export class DoctorController {
     return this.doctorService.create(createDoctorDto);
   }
 
-  @Get("all")
+  @Get('all')
   @ApiBearerAuth()
-
   findAll() {
     return this.doctorService.allDoctors();
   }
-  
+
   @Get('one-hospital-doctors/:hospital_id')
   @ApiBearerAuth()
   @Roles('HOSPITAL')
@@ -65,12 +65,12 @@ export class DoctorController {
       +hospital_id,
     );
   }
-  @Get('details-of-one-patient-by-doctor')
+  @Get('details-of/patient')
   @ApiBearerAuth()
   @Roles('DOCTOR')
   detailsOfOnePatientByDoctor(
-    @Param('visit_id') visit_id: number,
-    @Param('hospital_id') hospital_id: number,
+    @Query('visit_id') visit_id: number,
+    @Query('hospital_id') hospital_id: number,
     @CurrentUser() user: any,
   ) {
     return this.doctorService.detailsOfOnePatientByDoctor(
