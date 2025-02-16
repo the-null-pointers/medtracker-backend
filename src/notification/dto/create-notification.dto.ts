@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateNotificationDto {
   @IsString()
@@ -16,5 +16,6 @@ export class CreateNotificationDto {
   condition: string;
   @IsNumber()
   @ApiProperty()
-  hospital_id: string;
+  @IsOptional()
+  hospital_id: number;
 }
