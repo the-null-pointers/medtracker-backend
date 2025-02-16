@@ -7,10 +7,8 @@ export class HealthHistoryService {
   constructor(private readonly prisma: PrismaService) {}
   async getAllHistory(params: any) {
     const data = await this.prisma.healthHistory.findMany({
-      skip: params.skip,
-      take: params.take,
-
-      where: {},
+      skip: params.skip || undefined,
+      take: params.take || undefined,
       orderBy: {
         created_at: 'desc',
       },
