@@ -45,6 +45,14 @@ export class TreatmentService {
         doctor_id: user?.doctor?.id,
       },
     });
+    await this.prisma.visit.update({
+      where: {
+        id: visit.id,
+      },
+      data: {
+        status: 'ON_GOING',
+      },
+    });
     const prescription = await this.prisma.prescription.createMany({
       data: createTreatmentDto.prescriptions.map((prescription) => ({
         medication_name: prescription.medication_name,
@@ -85,7 +93,7 @@ export class TreatmentService {
     return responseHelper.success('Treatment found successfully', treatment);
   }
 
-  async update( updateTreatmentDto: UpdateTreatmentDto) {
+  async update(updateTreatmentDto: UpdateTreatmentDto) {
     let treatment = await this.prisma.treatment.findFirst({
       where: {
         visit_id: updateTreatmentDto.visit_id,
@@ -104,6 +112,11 @@ export class TreatmentService {
         symptoms: updateTreatmentDto.symptoms,
         diagnosis: updateTreatmentDto.diagnosis,
         treatment_date: updateTreatmentDto.treatment_date,
+        visit: {
+          update: {
+            status: 'SUCCESS',
+          },
+        },
       },
     });
     let visit = await this.prisma.visit.findUnique({
