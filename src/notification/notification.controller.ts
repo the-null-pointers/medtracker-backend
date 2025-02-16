@@ -20,39 +20,70 @@ import { Roles } from 'src/roles/roles.decorator';
 export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
 
-  @Post()
+  @Post('send-by-doctor')
   @ApiBearerAuth()
   @Roles('DOCTOR')
   create(
     @Body() createNotificationDto: CreateNotificationDto,
     @CurrentUser() user: any,
-   
   ) {
     return this.notificationService.doctorsNotification(
       user,
       createNotificationDto,
-   
+    );
+  }
+  @Post('send-by-hospital')
+  @ApiBearerAuth()
+  @Roles('HOSPITAL')
+  creatByHospital(
+    @Body() createNotificationDto: CreateNotificationDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.notificationService.hospitalNotification(
+      user,
+      createNotificationDto,
+    );
+  }
+  @Post('send-by-admin')
+  @ApiBearerAuth()
+  @Roles('ADMIN')
+  createByAdmin(
+    @Body() createNotificationDto: CreateNotificationDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.notificationService.adminNotification(
+      user,
+      createNotificationDto,
+    );
+  }
+  @Post('send-by-admin-for-hospital')
+  @ApiBearerAuth()
+  @Roles('ADMIN')
+  sendForHospital(
+    @Body() createNotificationDto: CreateNotificationDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.notificationService.hostpitalAdminNotification(
+      user,
+      createNotificationDto,
     );
   }
 
   @Get()
-  /*************  ✨ Codeium Command ⭐  *************/
-  /**
-   * Find all notifications
-   *
-   * @returns A list of all notifications
-   */
-  /******  b58b8e5b-0665-4458-94cd-127de29e0c3a  *******/
-  findAll() {
-    return this.notificationService.findAll();
+  @Roles('')
+  @ApiBearerAuth()
+  findAll(@CurrentUser() user: any) {
+    return this.notificationService.findAll(user);
   }
 
   @Get(':id')
+  @ApiBearerAuth()
   findOne(@Param('id') id: string) {
     return this.notificationService.findOne(+id);
   }
 
   @Patch(':id')
+  @ApiBearerAuth()
   update(
     @Param('id') id: string,
     @Body() updateNotificationDto: UpdateNotificationDto,
@@ -61,6 +92,8 @@ export class NotificationController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth()
+  @Roles('ADMIN')
   remove(@Param('id') id: string) {
     return this.notificationService.remove(+id);
   }
