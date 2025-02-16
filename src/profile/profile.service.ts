@@ -129,7 +129,7 @@ export class ProfileService {
     const patient = await this.prisma.patient.findUnique({
       where: {
         id: id,
-        user_id: user.id,
+        // user_id: user.id,
       },
       include: {
         user: {
