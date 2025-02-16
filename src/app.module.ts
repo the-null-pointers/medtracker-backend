@@ -18,9 +18,27 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { NotificationModule } from './notification/notification.module';
 import { GenerateAdminsModule } from './generate-admins/generate-admins.module';
 import { FeedbackModule } from './feedback/feedback.module';
+import { AdminModule } from './admin/admin.module';
+import { Admin } from './admin/entities/admin.entity';
 
 @Module({
-  imports: [AuthModule, PrismaModule, ProfileModule, HospitalModule, DoctorModule, TreatmentModule, HealthHistoryModule, RolesModule, LabReportModule, MailerModule, DashboardModule, NotificationModule, GenerateAdminsModule, FeedbackModule],
+  imports: [
+    AuthModule,
+    PrismaModule,
+    ProfileModule,
+    AdminModule,
+    HospitalModule,
+    DoctorModule,
+    TreatmentModule,
+    HealthHistoryModule,
+    RolesModule,
+    LabReportModule,
+    MailerModule,
+    DashboardModule,
+    NotificationModule,
+    GenerateAdminsModule,
+    FeedbackModule,
+  ],
   controllers: [AppController],
   providers: [AppService, PrismaService, TwilioService],
 })
