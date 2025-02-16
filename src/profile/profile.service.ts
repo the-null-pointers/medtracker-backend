@@ -99,7 +99,8 @@ export class ProfileService {
     try {
       const profile = await this.prisma.user.findUnique({
         where: {
-          phone: user.phone,
+          phone: user?.phone || undefined,
+          email: user?.email || undefined,
         },
         select: {
           id: true,
@@ -125,7 +126,6 @@ export class ProfileService {
     }
   }
   async findOnePatient(id: number, user: any) {
-    console.log(id, user);
     const patient = await this.prisma.patient.findUnique({
       where: {
         id: id,
@@ -140,10 +140,17 @@ export class ProfileService {
             roles: true,
           },
         },
-        healthHistory: true,
 
+        healthHistory: true,
         bills: true,
-        prescriptions: true,
+        prescriptions: {
+          select: {
+            id: true,
+            dosage: true,
+            frequency: true,
+            medication_name: true,
+          },
+        },
         insurance: true,
         appointments: true,
         visits: {
@@ -158,6 +165,7 @@ export class ProfileService {
         },
       },
     });
+
     if (!patient) {
       throw new NotFoundException(responseHelper.error('Patient not found'));
     }
