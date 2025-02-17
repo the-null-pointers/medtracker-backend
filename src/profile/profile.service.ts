@@ -143,14 +143,7 @@ export class ProfileService {
 
         healthHistory: true,
         bills: true,
-        prescriptions: {
-          select: {
-            id: true,
-            dosage: true,
-            frequency: true,
-            medication_name: true,
-          },
-        },
+        prescriptions: true,
         insurance: true,
         appointments: true,
         visits: {
