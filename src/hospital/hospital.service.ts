@@ -41,6 +41,7 @@ export class HospitalService {
       admin = await this.prisma.user.create({
         data: {
           phone: createHospitalDto.adminPhone,
+          email:createHospitalDto.infoMail,
           roles: {
             connect: {
               name: 'HOSPITAL',
@@ -55,6 +56,7 @@ export class HospitalService {
       admin = await this.prisma.user.update({
         where: {
           phone: createHospitalDto.adminPhone,
+          email:createHospitalDto.infoMail,
         },
         data: {
           roles: {
@@ -164,7 +166,6 @@ export class HospitalService {
       where: {
         hospital_id: hospital_id,
         status: 'ON_GOING',
-        
       },
       include: {
         doctor: true,
@@ -268,13 +269,13 @@ export class HospitalService {
             },
           },
         },
-        include: {
-          patients: {
-            select: {
-              visits: true,
-            },
-          },
-        },
+        // include: {
+        //   patients: {
+        //     select: {
+        //       visits: true,
+        //     },
+        //   },
+        // },
       });
     }
     // if both user and patient exist
