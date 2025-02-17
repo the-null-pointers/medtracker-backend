@@ -48,10 +48,9 @@ export class HealthHistoryService {
   }
   async getAllHistoryOfOnePatientByDoctor(id: number, params: any, user: any) {
     const data = await this.prisma.healthHistory.findMany({
-      skip: params.skip,
-      take: params.take,
+  
       where: {
-        patient_id: id,
+        patient_id: Number(id),
       },
       orderBy: {
         created_at: 'desc',
@@ -93,7 +92,7 @@ export class HealthHistoryService {
   async getOneVisit(id: number, user: any) {
     const data = await this.prisma.visit.findUnique({
       where: {
-        id: id,
+        id: Number(id),
       },
       include: {
         patient: {
@@ -116,14 +115,15 @@ export class HealthHistoryService {
         treatments: true,
       },
     });
+
     // if the patent doesnt belongs to the patients then he cant see it
-    if (data.patient.user_id !== user.id) {
-      throw new BadRequestException(
-        responseHelper.error('Patient does not exist', {
-          patient: ['Patient does not exist'],
-        }),
-      );
-    }
+    // if (data?.patient?.user_id !== user?.id) {
+    //   throw new BadRequestException(
+    //     responseHelper.error('Patient does not exist', {
+    //       patient: ['Patient does not exist'],
+    //     }),
+    //   );
+    // }
     return responseHelper.success('Available history Record', data);
   }
   async getOneHistory(id: number) {
