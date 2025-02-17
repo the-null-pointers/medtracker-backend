@@ -143,7 +143,12 @@ export class ProfileService {
 
         healthHistory: true,
         bills: true,
-        prescriptions: true,
+        prescriptions: {
+          include: {
+            doctor: true,
+            patient: true,
+          },
+        },
         insurance: true,
         appointments: true,
         visits: {
